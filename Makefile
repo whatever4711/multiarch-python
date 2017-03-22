@@ -24,7 +24,10 @@ endif
 
 all: $(ARCHITECTURES)
 
-$(ARCHITECTURES):
+register:
+	@docker run --rm --privileged $(MULTIARCH) --reset
+
+$(ARCHITECTURES): register
 	@mkdir -p $(TMP_DIR)
 	@curl -L -o $(TMP_DIR)/qemu-$@-static.tar.gz $(QEMU_STATIC)/qemu-$(strip $(call convert_archs,$@))-static.tar.gz
 	@tar xzf $(TMP_DIR)/qemu-$@-static.tar.gz -C $(TMP_DIR)
@@ -33,7 +36,6 @@ $(ARCHITECTURES):
 		-e "s|<QEMU>|COPY $(TMP_DIR)/qemu-$(strip $(call convert_archs,$@))-static /usr/bin/qemu-$(strip $(call convert_archs,$@))-static|g" \
 		Dockerfile.generic > $(TMP_DOCKERFILE)-$@
 	@sed -i -e "s|amd64/$(IMAGE)|$(IMAGE)|g" $(TMP_DOCKERFILE)-$@
-	@docker run --rm --privileged $(MULTIARCH) --reset
 	@docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 			--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
 			--build-arg VCS_URL=$(shell git config --get remote.origin.url) \
@@ -48,7 +50,7 @@ push:
 
 clean:
 	@rm -rf $(TMP_DIR) $(TMP_DOCKERFILE)-*
-	
+
 define convert_archs
 	$(shell echo $(1) | sed -e "s|armhf|arm|g" -e "s|amd64|x86_64|g")
 endef
