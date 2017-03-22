@@ -21,7 +21,6 @@ else
 	endif
 endif
 
-.NOTPARALLEL: all
 
 all: $(ARCHITECTURES)
 
