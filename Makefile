@@ -39,8 +39,7 @@ $(ARCHITECTURES):
 			--build-arg VCS_URL=$(shell git config --get remote.origin.url) \
 			--build-arg VERSION="1.0" \
 			-f $(TMP_DOCKERFILE)-$@ -t $(REPO):$@-$(TAG) .
-	@$(MAKE) clean
-
+	
 # To adjust for local registry
 push:
 	@docker login -u $(DOCKER_USER) -p $(DOCKER_PASS)
