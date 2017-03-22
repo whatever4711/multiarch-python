@@ -3,8 +3,7 @@ QEMU_STATIC := https://github.com/multiarch/qemu-user-static/releases/download/v
 IMAGE := alpine:3.5
 MULTIARCH := multiarch/qemu-user-static:register
 TMP_DIR := tmp
-TMP_DOCKERFILE := Dockerfile.generated
-
+TMP_DOCKERFILE := DF
 ifeq ($(REPO),)
 ifeq ($(USER),)
   REPO := pymon
@@ -33,14 +32,14 @@ $(ARCHITECTURES):
 	@sed -e "s|<IMAGE>|$@/$(IMAGE)|g" \
 		-e "s|<ARCH>|$@|g" \
 		-e "s|<QEMU>|COPY $(TMP_DIR)/qemu-$(strip $(call convert_archs,$@))-static /usr/bin/qemu-$(strip $(call convert_archs,$@))-static|g" \
-		Dockerfile.generic > $(TMP_DOCKERFILE)
-	@sed -i -e "s|amd64/$(IMAGE)|$(IMAGE)|g" $(TMP_DOCKERFILE)
-	@docker run --rm --privileged $(MULTIARCH) --reset
+		Dockerfile.generic > $(TMP_DOCKERFILE)-$@
+@sed -i -e "s|amd64/$(IMAGE)|$(IMAGE)|g" $(TMP_DOCKERFILE)-$@	
+@docker run --rm --privileged $(MULTIARCH) --reset
 	@docker build --build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 			--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
 			--build-arg VCS_URL=$(shell git config --get remote.origin.url) \
 			--build-arg VERSION="1.0" \
-			-f $(TMP_DOCKERFILE) -t $(REPO):$@-$(TAG) .
+			-f $(TMP_DOCKERFILE)-$@ -t $(REPO):$@-$(TAG) .
 	@$(MAKE) clean
 
 # To adjust for local registry
@@ -50,8 +49,7 @@ push:
 	@docker logout
 
 clean:
-	@rm -rf $(TMP_DIR) $(TMP_DOCKERFILE)
-
+	@rm -rf $(TMP_DIR) $(TMP_DOCKERFILE)-*
 define convert_archs
 	$(shell echo $(1) | sed -e "s|armhf|arm|g" -e "s|amd64|x86_64|g")
 endef
