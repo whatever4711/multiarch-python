@@ -15,7 +15,7 @@ script:
 - travis_wait make aarch64
 after_success:
 - docker images
-#- make push_all
+- make push
 #- curl -X POST https://hooks.microbadger.com/images/whatever4711/caddy/sFGLgrc2bLHyra3wt4m519VFgLE=
 #- curl -X POST https://hooks.microbadger.com/images/whatever4711/postgres/nmmIZPMYhvqLv_lvb1dau0Xlems=
 #- curl -X POST https://hooks.microbadger.com/images/whatever4711/monit/oX7Ez6hVS9YABvXnuKg8VIctkJo=
