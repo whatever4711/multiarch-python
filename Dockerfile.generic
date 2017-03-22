@@ -8,9 +8,7 @@ ARG VERSION
 
 ENV ARCH <ARCH>
 
-# Problem with dockerize on AARCH64, need to use armhf-version
 RUN BUILD_DEPS="ca-certificates wget musl-dev linux-headers g++ libpng-dev freetype-dev python3-dev" && \
-    DOCKERIZE_ARCH=$(echo "${ARCH}" | sed -e "s/aarch64/armhf/g") && \
     apk add --update --no-cache python3 py3-pip gcc tini libpng freetype ${BUILD_DEPS} && \
     ln -s /usr/bin/pip3 /usr/bin/pip && \
     ln -s /usr/include/locale.h /usr/include/xlocale.h && \
